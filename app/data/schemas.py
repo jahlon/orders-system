@@ -5,7 +5,7 @@ def product_schema(product) -> dict:
         'sku': product['sku'],
         'price': product['price'],
         'description': product['description'],
-        'image': product['image']
+        'image_url': product['image_url']
     }
 
 

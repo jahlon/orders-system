@@ -6,7 +6,7 @@ class Product(BaseModel):
     name: str
     description: str
     price: float
-    image: str
+    image_url: str
 
 
 class Order(BaseModel):
