@@ -12,3 +12,7 @@ class ProductAlreadyExistsError(OrdersSystemError):
 
 class ProductNotFoundError(OrdersSystemError):
     pass
+
+
+class CouldNotUploadFileError(OrdersSystemError):
+    pass

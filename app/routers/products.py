@@ -1,10 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, Form
 
 from app.controllers.product_controller import ProductController
-from app.data.errors import ProductNotFoundError, ProductAlreadyExistsError, CouldNotUpdateProductError
+from app.data.errors import ProductNotFoundError, ProductAlreadyExistsError, CouldNotUpdateProductError, \
+    CouldNotUploadFileError
 from app.data.models import Product
+
 
 router = APIRouter(
     prefix='/products',
@@ -29,16 +31,24 @@ async def get_product(product_sku: str, controller: ControllerDependency) -> Pro
 
 
 @router.post('/')
-async def create_product(product: Product, controller: ControllerDependency) -> Product:
+async def create_product(sku: Annotated[str, Form()], name: Annotated[str, Form()],
+                         description: Annotated[str, Form()], price: Annotated[float, Form()],
+                         image: UploadFile, controller: ControllerDependency) -> Product:
     try:
-        return controller.create(product)
+        return await controller.create(sku=sku, name=name, description=description, price=price, image=image)
     except ProductAlreadyExistsError as err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+    except CouldNotUploadFileError as err:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
 
 
 @router.put('/{product_sku}')
-async def update_product(product: Product, controller: ControllerDependency) -> Product:
+async def update_product(sku: Annotated[str, Form()], name: Annotated[str, Form()],
+                         description: Annotated[str, Form()], price: Annotated[float, Form()],
+                         controller: ControllerDependency, image: UploadFile = UploadFile(None)) -> Product:
     try:
-        return controller.update(product)
+        return await controller.update(sku=sku, name=name, description=description, price=price, image=image)
+    except ProductNotFoundError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     except CouldNotUpdateProductError as err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
