@@ -50,3 +50,4 @@ class ProductService(IProductService):
         found = self.product_collection.find_one_and_delete({'sku': product_sku})
         if not found:
             raise ProductNotFoundError(f"Product with sku {product_sku} not found")
+        return Product(**found)

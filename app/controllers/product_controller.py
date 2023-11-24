@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, UploadFile
 
 from app.data.models import Product
-from app.services.aws_service import upload_file_to_s3
+from app.services.aws_service import upload_file_to_s3, delete_file_from_s3
 from app.services.impl import ProductService
 from app.services.interfaces import IProductService
 
@@ -44,5 +44,8 @@ class ProductController:
         updated_product = stored_product.model_copy(update=update_data)
         return self.product_service.update(updated_product)
 
-    def delete(self, product_sku):
-        return self.product_service.delete(product_sku)
+    async def delete(self, product_sku):
+        product = self.product_service.delete(product_sku)
+        extension = product.image_url.split('.')[-1]
+        response = await delete_file_from_s3(f"{product_sku}.{extension}")
+        return product

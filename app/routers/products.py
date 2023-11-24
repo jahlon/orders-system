@@ -42,7 +42,7 @@ async def create_product(sku: Annotated[str, Form()], name: Annotated[str, Form(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
 
 
-@router.put('/{product_sku}')
+@router.put('/')
 async def update_product(sku: Annotated[str, Form()], name: Annotated[str, Form()],
                          description: Annotated[str, Form()], price: Annotated[float, Form()],
                          controller: ControllerDependency, image: UploadFile = UploadFile(None)) -> Product:
@@ -52,3 +52,11 @@ async def update_product(sku: Annotated[str, Form()], name: Annotated[str, Form(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     except CouldNotUpdateProductError as err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+
+
+@router.delete('/{product_sku}')
+async def delete_product(product_sku: str, controller: ControllerDependency) -> Product:
+    try:
+        return await controller.delete(product_sku)
+    except ProductNotFoundError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))

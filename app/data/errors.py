@@ -16,3 +16,7 @@ class ProductNotFoundError(OrdersSystemError):
 
 class CouldNotUploadFileError(OrdersSystemError):
     pass
+
+
+class CouldNotDeleteFileError(OrdersSystemError):
+    pass
