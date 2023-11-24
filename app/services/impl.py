@@ -15,17 +15,17 @@ class ProductService(IProductService):
     def __init__(self, repository: Annotated[OrdersSystemRepository, Depends(OrdersSystemRepository)]):
         self.product_collection = repository.get_collection('products')
 
-    def get_all(self):
+    def get_all(self) -> list[Product]:
         products = list(map(lambda product: product_schema(product), self.product_collection.find()))
         return list(map(lambda product: Product(**product), products))
 
-    def get_by_sku(self, product_sku: str):
+    def get_by_sku(self, product_sku: str) -> Product:
         product = self.product_collection.find_one({'sku': product_sku})
         if not product:
             raise ProductNotFoundError(f"Product with sku {product_sku} not found")
         return Product(**product_schema(product))
 
-    def create(self, product: Product):
+    def create(self, product: Product) -> Product:
         found_product = self.product_collection.find_one({'sku': product.sku})
         if found_product:
             raise ProductAlreadyExistsError(f"Product with sku {product.sku} already exists")
@@ -35,7 +35,7 @@ class ProductService(IProductService):
         new_product = product_schema(self.product_collection.find_one({"_id": _id}))
         return Product(**new_product)
 
-    def update(self, product: Product):
+    def update(self, product: Product) -> Product:
         product_dict = dict(product)
         sku = product.sku
         try:
