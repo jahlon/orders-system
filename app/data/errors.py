@@ -20,3 +20,7 @@ class CouldNotUploadFileError(OrdersSystemError):
 
 class CouldNotDeleteFileError(OrdersSystemError):
     pass
+
+
+class OrderNotFoundError(OrdersSystemError):
+    pass

@@ -1,4 +1,9 @@
-from pydantic import BaseModel
+from datetime import datetime
+from enum import Enum
+from typing import List
+from uuid import uuid4
+
+from pydantic import BaseModel, Field
 
 
 class Product(BaseModel):
@@ -9,10 +14,59 @@ class Product(BaseModel):
     image_url: str
 
 
-class Order(BaseModel):
-    id: str
-    products: list[Product]
-    total: float
-    status: str
-    created_at: str
-    updated_at: str
+class Item(BaseModel):
+    sku: str
+    price: float
+    quantity: int
+
+    @property
+    def total(self) -> float:
+        return self.price * self.quantity
+
+
+class OrderStatus(Enum):
+    PENDING = 'pending'
+    COMPLETED = 'completed'
+    CANCELLED = 'cancelled'
+
+
+class OrderBase(BaseModel):
+    products: List[Item]
+    status: OrderStatus = OrderStatus.PENDING
+
+    class Config:
+        use_enum_values = True
+
+
+class OrderIn(OrderBase):
+
+    model_config = {
+        'use_enum_values': True,
+        'json_schema_extra': {
+            'example': {
+                'products': [
+                    {
+                        'sku': 'SP001',
+                        'price': 2,
+                        'quantity': 3
+                    },
+                    {
+                        'sku': 'EA001',
+                        'price': 850,
+                        'quantity': 2
+                    }
+                ],
+                'status': 'pending'
+            }
+        }
+    }
+
+
+class OrderOut(OrderBase):
+    id: str = Field(default_factory=lambda: uuid4().hex)
+    total: float | None = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    def update_total(self):
+        self.total = sum(map(lambda item: item.total, self.products))
+

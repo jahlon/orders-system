@@ -1,14 +1,16 @@
 from typing import Annotated
 
+from bson import ObjectId
 from fastapi import Depends
 from pymongo import ReturnDocument
 from pymongo.errors import PyMongoError
 
-from app.data.errors import ProductNotFoundError, ProductAlreadyExistsError, CouldNotUpdateProductError
-from app.data.models import Product
+from app.data.errors import ProductNotFoundError, ProductAlreadyExistsError, CouldNotUpdateProductError, \
+    OrderNotFoundError
+from app.data.models import Product, OrderOut
 from app.data.repository import OrdersSystemRepository
-from app.data.schemas import product_schema
-from app.services.interfaces import IProductService
+from app.data.schemas import product_schema, order_schema
+from app.services.interfaces import IProductService, IOrderService
 
 
 class ProductService(IProductService):
@@ -51,3 +53,24 @@ class ProductService(IProductService):
         if not found:
             raise ProductNotFoundError(f"Product with sku {product_sku} not found")
         return Product(**found)
+
+
+class OrderService(IOrderService):
+    def __init__(self, repository: Annotated[OrdersSystemRepository, Depends(OrdersSystemRepository)]):
+        self.order_collection = repository.get_collection('orders')
+
+    def get_all(self) -> list[OrderOut]:
+        orders = list(map(lambda order: order_schema(order), self.order_collection.find()))
+        return list(map(lambda order: OrderOut(**order), orders))
+
+    def get_by_id(self, order_id: str) -> OrderOut:
+        order = self.order_collection.find_one({'id': order_id})
+        if not order:
+            raise OrderNotFoundError(f"Order with id {order_id} not found")
+        return OrderOut(**order)
+
+    def create(self, order: OrderOut) -> OrderOut:
+        order_dict = dict(order.model_dump())
+        _id = self.order_collection.insert_one(order_dict).inserted_id
+        new_order = self.order_collection.find_one({"_id": ObjectId(_id)})
+        return OrderOut(**new_order)
