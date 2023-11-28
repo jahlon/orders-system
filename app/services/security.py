@@ -42,14 +42,10 @@ def get_password_hash(password: str) -> str:
 
 def authenticate_user(username: str, password: str,
                       user_service: IUserService) -> User | None:
-    try:
-        user = user_service.get_by_username(username)
-    except UserNotFoundError:
-        raise
-    else:
-        if not verify_password(password, user.hashed_password):
-            raise IncorrectPasswordError
-        return user
+    user = user_service.get_by_username(username)
+    if not verify_password(password, user.hashed_password):
+        raise IncorrectPasswordError
+    return user
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
