@@ -70,3 +70,13 @@ class OrderOut(OrderBase):
     def update_total(self):
         self.total = sum(map(lambda item: item.total, self.products))
 
+
+class User(BaseModel):
+    username: str
+    email: str | None = None
+    full_name: str | None = None
+    disabled: bool | None = None
+
+
+class UserInDB(User):
+    hashed_password: str
