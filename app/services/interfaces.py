@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from app.data.models import Product, OrderOut, OrderIn
+from app.data.models import Product, OrderOut, OrderIn, User, UserInDB
 
 
 class IProductService(Protocol):
@@ -28,4 +28,9 @@ class IOrderService(Protocol):
         ...
 
     def create(self, order: OrderOut) -> OrderOut:
+        ...
+
+
+class IUserService(Protocol):
+    def get_by_username(self, username: str) -> UserInDB:
         ...

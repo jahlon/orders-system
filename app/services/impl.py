@@ -6,11 +6,10 @@ from pymongo import ReturnDocument
 from pymongo.errors import PyMongoError
 
 from app.data.errors import ProductNotFoundError, ProductAlreadyExistsError, CouldNotUpdateProductError, \
-    OrderNotFoundError
-from app.data.models import Product, OrderOut
+    OrderNotFoundError, UserNotFoundError
+from app.data.models import Product, OrderOut, UserInDB
 from app.data.repository import OrdersSystemRepository
-from app.data.schemas import product_schema, order_schema
-from app.services.interfaces import IProductService, IOrderService
+from app.services.interfaces import IProductService, IOrderService, IUserService
 
 
 class ProductService(IProductService):
@@ -18,14 +17,14 @@ class ProductService(IProductService):
         self.product_collection = repository.get_collection('products')
 
     def get_all(self) -> list[Product]:
-        products = list(map(lambda product: product_schema(product), self.product_collection.find()))
+        products = list(self.product_collection.find())
         return list(map(lambda product: Product(**product), products))
 
     def get_by_sku(self, product_sku: str) -> Product:
         product = self.product_collection.find_one({'sku': product_sku})
         if not product:
             raise ProductNotFoundError(f"Product with sku {product_sku} not found")
-        return Product(**product_schema(product))
+        return Product(**product)
 
     def create(self, product: Product) -> Product:
         found_product = self.product_collection.find_one({'sku': product.sku})
@@ -34,7 +33,7 @@ class ProductService(IProductService):
 
         product_dict = dict(product)
         _id = self.product_collection.insert_one(product_dict).inserted_id
-        new_product = product_schema(self.product_collection.find_one({"_id": _id}))
+        new_product = self.product_collection.find_one({"_id": _id})
         return Product(**new_product)
 
     def update(self, product: Product) -> Product:
@@ -46,7 +45,7 @@ class ProductService(IProductService):
         except PyMongoError as err:
             raise CouldNotUpdateProductError(f"Could not update product with sku {sku}") from err
         else:
-            return Product(**product_schema(updated_product))
+            return Product(**updated_product)
 
     def delete(self, product_sku):
         found = self.product_collection.find_one_and_delete({'sku': product_sku})
@@ -60,7 +59,7 @@ class OrderService(IOrderService):
         self.order_collection = repository.get_collection('orders')
 
     def get_all(self) -> list[OrderOut]:
-        orders = list(map(lambda order: order_schema(order), self.order_collection.find()))
+        orders = list(self.order_collection.find())
         return list(map(lambda order: OrderOut(**order), orders))
 
     def get_by_id(self, order_id: str) -> OrderOut:
@@ -74,3 +73,14 @@ class OrderService(IOrderService):
         _id = self.order_collection.insert_one(order_dict).inserted_id
         new_order = self.order_collection.find_one({"_id": ObjectId(_id)})
         return OrderOut(**new_order)
+
+
+class UserService(IUserService):
+    def __init__(self, repository: Annotated[OrdersSystemRepository, Depends(OrdersSystemRepository)]):
+        self.users_collection = repository.get_collection('users')
+
+    def get_by_username(self, username: str) -> UserInDB:
+        user = self.users_collection.find_one({'username': username})
+        if not user:
+            raise UserNotFoundError(f"User with username {username} not found")
+        return UserInDB(**user)
