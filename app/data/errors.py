@@ -24,3 +24,11 @@ class CouldNotDeleteFileError(OrdersSystemError):
 
 class OrderNotFoundError(OrdersSystemError):
     pass
+
+
+class UserNotFoundError(OrdersSystemError):
+    pass
+
+
+class IncorrectPasswordError(OrdersSystemError):
+    pass

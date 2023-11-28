@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 
-from app.routers import products, orders
+from app.routers import products, orders, auth
+from app.services.security import get_current_user
 
 description = """
 Orders System API simulates a simple order management system. 
@@ -23,8 +24,12 @@ You will be able to:
 - Create an order
 - Get an order by id
 - Get all orders
-"""
 
+## Authentication
+You will be able to:
+- Login for getting a JWT token
+- Get your user information
+"""
 
 tags_metadata = [
     {
@@ -34,6 +39,10 @@ tags_metadata = [
     {
         "name": "orders",
         "description": "Operations related to orders",
+    },
+    {
+        "name": "auth",
+        "description": "Operations related to authentication",
     },
 ]
 
@@ -56,5 +65,6 @@ app = FastAPI(
 )
 
 
-app.include_router(products.router)
-app.include_router(orders.router)
+app.include_router(auth.router)
+app.include_router(products.router, dependencies=[Depends(get_current_user)])
+app.include_router(orders.router, dependencies=[Depends(get_current_user)])
