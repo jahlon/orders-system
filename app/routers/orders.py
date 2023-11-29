@@ -17,25 +17,19 @@ router = APIRouter(
 ControllerDependency = Annotated[OrderController, Depends(OrderController)]
 
 
-@router.get('/')
-async def get_orders(controller: ControllerDependency,
-                     current_user: Annotated[
-                         User, Security(get_current_active_user, scopes=["order_read"])]) -> list[OrderOut]:
+@router.get('/', dependencies=[Security(get_current_active_user, scopes=["order_read"])])
+async def get_orders(controller: ControllerDependency) -> list[OrderOut]:
     return controller.get_all()
 
 
-@router.get('/{order_id}')
-async def get_order(order_id: str, controller: ControllerDependency,
-                    current_user: Annotated[
-                        User, Security(get_current_active_user, scopes=["order_read"])]) -> OrderOut:
+@router.get('/{order_id}', dependencies=[Security(get_current_active_user, scopes=["order_read"])])
+async def get_order(order_id: str, controller: ControllerDependency) -> OrderOut:
     try:
         return controller.get_by_id(order_id)
     except OrderNotFoundError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
 
 
-@router.post('/')
-async def create_order(order: OrderIn, controller: ControllerDependency,
-                       current_user: Annotated[
-                           User, Security(get_current_active_user, scopes=["order_write"])]) -> OrderOut:
+@router.post('/', dependencies=[Security(get_current_active_user, scopes=["order_write"])])
+async def create_order(order: OrderIn, controller: ControllerDependency) -> OrderOut:
     return await controller.create(order)
