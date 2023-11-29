@@ -11,7 +11,21 @@ from app.services.security import get_current_active_user
 router = APIRouter(
     prefix='/products',
     tags=['products'],
-    responses={404: {'description': 'Not found'}},
+    responses={
+        404: {
+            'description': 'Not found'
+        },
+        401: {
+            'description': 'Unauthorized',
+            'content': {
+                'application/json': {
+                    'example': {
+                        'detail': 'Not enough permissions',
+                    }
+                }
+            }
+        }
+    },
 )
 
 ControllerDependency = Annotated[ProductController, Depends(ProductController)]
