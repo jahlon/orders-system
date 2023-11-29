@@ -1,8 +1,8 @@
 from datetime import timedelta, datetime
 from typing import Annotated
 
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, Security
+from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -25,11 +25,21 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+    scopes: list[str] = []
 
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/auth/token",
+    scopes={
+        "me": "Read information about the current user.",
+        "product_read": "Read products",
+        "product_write": "Create, update and delete products",
+        "order_read": "Read orders",
+        "order_write": "Create orders"
+    }
+)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -63,8 +73,14 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     return encoded_jwt
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
+async def get_current_user(security_scopes: SecurityScopes,
+                           token: Annotated[str, Depends(oauth2_scheme)],
                            user_service: Annotated[UserService, Depends(UserService)]) -> User:
+
+    if security_scopes.scopes:
+        authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
+    else:
+        authenticate_value = 'Bearer'
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Could not validate credentials',
@@ -75,7 +91,8 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
         username: str = payload.get('sub')
         if username is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        token_scopes = payload.get('scopes', [])
+        token_data = TokenData(scopes=token_scopes, username=username)
     except JWTError:
         raise credentials_exception
     else:
@@ -84,10 +101,17 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
         except UserNotFoundError:
             raise credentials_exception
         else:
+            for scope in security_scopes.scopes:
+                if scope not in token_data.scopes:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail='Not enough permissions',
+                        headers={'WWW-Authenticate': authenticate_value}
+                    )
             return user
 
 
-async def get_current_active_user(current_user: Annotated[User, Depends(get_current_user)]) -> User:
+async def get_current_active_user(current_user: Annotated[User, Security(get_current_user, scopes=["me"])]) -> User:
     if current_user.disabled:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Inactive user')
     return current_user
