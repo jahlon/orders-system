@@ -64,8 +64,8 @@ async def update_product(sku: Annotated[str, Form()], name: Annotated[str, Form(
         return await controller.update(sku=sku, name=name, description=description, price=price, image=image)
     except ProductNotFoundError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
-    except CouldNotUpdateProductError as err:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+    except CouldNotUploadFileError as err:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
 
 
 @router.delete('/{product_sku}', dependencies=[Security(get_current_active_user, scopes=["product_write"])])
