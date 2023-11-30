@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from app.data.models import Product, OrderOut, OrderIn, User, UserInDB
+from app.data.models import Product, OrderOut, UserInDB
 
 
 class IProductService(Protocol):

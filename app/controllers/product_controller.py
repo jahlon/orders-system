@@ -47,5 +47,5 @@ class ProductController:
     async def delete(self, product_sku):
         product = self.product_service.delete(product_sku)
         extension = product.image_url.split('.')[-1]
-        response = await delete_file_from_s3(f"{product_sku}.{extension}")
+        await delete_file_from_s3(f"{product_sku}.{extension}")
         return product

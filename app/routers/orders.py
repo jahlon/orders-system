@@ -5,7 +5,7 @@ from starlette import status
 
 from app.controllers.order_controller import OrderController
 from app.data.errors import OrderNotFoundError
-from app.data.models import OrderIn, OrderOut, User
+from app.data.models import OrderIn, OrderOut
 from app.services.security import get_current_active_user
 
 router = APIRouter(
