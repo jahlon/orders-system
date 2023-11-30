@@ -5,7 +5,10 @@ from typing import Annotated
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
+
+# noinspection PyPackageRequirements
 from jose import jwt, JWTError
+
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from starlette import status
