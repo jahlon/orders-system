@@ -25,10 +25,7 @@ jobs:
     - name: Build and push Docker image
       run: |
         docker buildx create --use
-        docker buildx build \
-          --file Dockerfile \
-          --tag jahlon/teaching-hub:latest \
-          --push
+        docker buildx build --file Dockerfile --tag jahlon/teaching-hub:latest --push
 
     env:
       DOCKER_CLI_EXPERIMENTAL: enabled
