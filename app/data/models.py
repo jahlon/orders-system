@@ -65,6 +65,7 @@ class OrderIn(OrderBase):
 class OrderOut(OrderBase):
     id: str = Field(default_factory=lambda: uuid4().hex)
     total: float | None = None
+    user: str | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     def update_total(self):
