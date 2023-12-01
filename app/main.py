@@ -30,6 +30,7 @@ You will be able to:
 You will be able to:
 - Login for getting a JWT token
 - Get your user information
+- Create a new user
 """
 
 tags_metadata = [
