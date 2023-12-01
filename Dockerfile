@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir --upgrade -r /orders-api/requirements.txt
 # Copy the app directory contents into the container at /orders-api
 COPY ./app /orders-api/app
 # Copy the .env file into the container at /orders-api
-COPY ./.env /orders-api/.env
+COPY .env /orders-api/.env
 
 # Make port 80 available to the world outside this container
 EXPOSE 80
