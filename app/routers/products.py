@@ -3,8 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, Form, Security
 
 from app.controllers.product_controller import ProductController
-from app.data.errors import ProductNotFoundError, ProductAlreadyExistsError, CouldNotUpdateProductError, \
-    CouldNotUploadFileError
+from app.data.errors import ProductNotFoundError, ProductAlreadyExistsError, CouldNotUploadFileError
 from app.data.models import Product
 from app.services.security import get_current_active_user
 

@@ -32,4 +32,3 @@ async def delete_file_from_s3(file_name: str, bucket: str = aws_bucket):
         raise CouldNotDeleteFileError(e)
     else:
         return response
-
