@@ -16,7 +16,6 @@ class OrdersSystemRepository:
         uri = f"mongodb+srv://{user}:{password}@{host}/?retryWrites=true&w=majority"
         self.__client = MongoClient(uri)
         self.__db = self.client.get_database(db_name)
-        print("Successfully connected to MongoDB!")
 
     def get_collection(self, collection_name):
         return self.db[collection_name]
