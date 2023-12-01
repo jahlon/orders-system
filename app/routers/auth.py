@@ -1,12 +1,13 @@
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
+from app.controllers.user_controller import UserController
 from app.data.errors import UserNotFoundError, IncorrectPasswordError
-from app.data.models import User
+from app.data.models import User, UserIn
 from app.services.impl import UserService
 from app.services.interfaces import IUserService
 from app.services.security import Token, authenticate_user, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, \
@@ -17,6 +18,23 @@ router = APIRouter(
     tags=['auth'],
     responses={404: {'description': 'Not found'}},
 )
+
+
+@router.post("/users", response_model=User, dependencies=[Security(get_current_active_user, scopes=["user_write"])])
+async def register_user(user: UserIn, controller: Annotated[UserController, Depends()]):
+    try:
+        controller.get_by_username(user.username)
+    except UserNotFoundError:
+        user = controller.register_user(user)
+        data = dict(user)
+        data.pop('hashed_password')
+        data.pop('scopes')
+        return User(**data)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail='User already exists',
+        )
 
 
 @router.post("/token", response_model=Token)

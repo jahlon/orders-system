@@ -84,3 +84,9 @@ class UserService(IUserService):
         if not user:
             raise UserNotFoundError(f"User with username {username} not found")
         return UserInDB(**user)
+
+    def create(self, user: UserInDB) -> UserInDB:
+        user_dict = dict(user)
+        _id = self.users_collection.insert_one(user_dict).inserted_id
+        new_user = self.users_collection.find_one({"_id": ObjectId(_id)})
+        return UserInDB(**new_user)

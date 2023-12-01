@@ -34,3 +34,6 @@ class IOrderService(Protocol):
 class IUserService(Protocol):
     def get_by_username(self, username: str) -> UserInDB:
         ...
+
+    def create(self, user: UserInDB) -> UserInDB:
+        ...
