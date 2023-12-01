@@ -12,6 +12,13 @@ from app.services.security import get_current_user
 from tests.mocks.controllers_mocks import ProductControllerMock
 from tests.mocks.services_mocks import ProductServiceMock
 
+DESCRIPTION_CHANGED = 'Description 123 changed'
+PRODUCT_CHANGED = 'Product 123 changed'
+IMAGE_PNG = "product_image.png"
+IMAGE_TYPE = "image/png"
+SKU_NOT_FOUND = 'Product with sku incorrect_sku not found'
+PRODUCTS = '/products'
+
 client = TestClient(app)
 
 
@@ -24,7 +31,7 @@ def assert_200_response(response):
     assert response.json().get('sku') == "123"
     assert response.json().get('name') == "Product 123"
     assert response.json().get('description') == "Description 123"
-    assert response.json().get('price') == 123.0
+    assert response.json().get('price') == 123
     assert response.json().get('image_url') == "https://example.com/123.png"
 
 
@@ -44,20 +51,20 @@ def product_image():
 
 
 def test_get_all_products_return_200_status(product_route_dependencies_mock):
-    response = client.get('/products')
+    response = client.get(PRODUCTS)
     assert response.status_code == 200
     assert len(response.json()) == 2
     app.dependency_overrides = {}
 
 
 def test_get_product_return_200_status(product_route_dependencies_mock):
-    response = client.get('/products/123')
+    response = client.get(f'{PRODUCTS}/123')
     assert_200_response(response)
     app.dependency_overrides = {}
 
 
 def test_get_product_return_404_status_with_incorrect_sku(product_route_dependencies_mock):
-    response = client.get('/products/incorrect_sku')
+    response = client.get(f'{PRODUCTS}/incorrect_sku')
     assert response.status_code == 404
     assert response.json().get('detail') == 'Product with sku incorrect_sku not found'
     app.dependency_overrides = {}
@@ -67,15 +74,15 @@ def test_create_product_return_200_status(product_image, product_route_dependenc
     # noinspection PyUnresolvedReferences
     app.dependency_overrides[ProductController] = ProductControllerMock
     response = client.post(
-        '/products',
+        PRODUCTS,
         data={'sku': '789', 'name': 'Product 789', 'description': 'Description 789', 'price': 789.0},
-        files={'image': ("product_image.png", product_image, "image/png")}
+        files={'image': (IMAGE_PNG, product_image, IMAGE_TYPE)}
     )
     assert response.status_code == 200
     assert response.json().get('sku') == "789"
     assert response.json().get('name') == "Product 789"
     assert response.json().get('description') == "Description 789"
-    assert response.json().get('price') == 789.0
+    assert response.json().get('price') == 789
     assert response.json().get('image_url') == "https://example.com/789.png"
     product_image.close()
     app.dependency_overrides = {}
@@ -85,9 +92,9 @@ def test_create_product_return_400_status_with_existing_sku(product_image, produ
     # noinspection PyUnresolvedReferences
     app.dependency_overrides[ProductController] = ProductControllerMock
     response = client.post(
-        '/products',
+        PRODUCTS,
         data={'sku': '123', 'name': 'Product 123', 'description': 'Description 123', 'price': 123.0},
-        files={'image': ("product_image.png", product_image, "image/png")}
+        files={'image': (IMAGE_PNG, product_image, IMAGE_TYPE)}
     )
     assert response.status_code == 400
     assert response.json().get('detail') == 'Product with sku 123 already exists'
@@ -99,9 +106,9 @@ def test_create_product_return_500_status_with_incorrect_image(product_image, pr
     # noinspection PyUnresolvedReferences
     app.dependency_overrides[ProductController] = ProductControllerMock
     response = client.post(
-        '/products',
+        PRODUCTS,
         data={'sku': '789', 'name': 'Product 789', 'description': 'Description 789', 'price': 789.0},
-        files={'image': ("bad_image.png", product_image, "image/png")}
+        files={'image': ("bad_image.png", product_image, IMAGE_TYPE)}
     )
     assert response.status_code == 500
     assert response.json().get('detail') == 'Could not upload file'
@@ -113,15 +120,15 @@ def test_update_product_return_200_status(product_image, product_route_dependenc
     # noinspection PyUnresolvedReferences
     app.dependency_overrides[ProductController] = ProductControllerMock
     response = client.put(
-        '/products',
-        data={'sku': '123', 'name': 'Product 123 changed', 'description': 'Description 123 changed', 'price': 321.0},
-        files={'image': ("product_image.png", product_image, "image/png")}
+        PRODUCTS,
+        data={'sku': '123', 'name': PRODUCT_CHANGED, 'description': DESCRIPTION_CHANGED, 'price': 321.0},
+        files={'image': ("product_image.png", product_image, IMAGE_TYPE)}
     )
     assert response.status_code == 200
     assert response.json().get('sku') == "123"
     assert response.json().get('name') == "Product 123 changed"
     assert response.json().get('description') == "Description 123 changed"
-    assert response.json().get('price') == 321.0
+    assert response.json().get('price') == 321
     assert response.json().get('image_url') == "https://example.com/123.png"
     product_image.close()
     app.dependency_overrides = {}
@@ -131,13 +138,13 @@ def test_update_product_return_404_status_with_incorrect_sku(product_image, prod
     # noinspection PyUnresolvedReferences
     app.dependency_overrides[ProductController] = ProductControllerMock
     response = client.put(
-        '/products',
-        data={'sku': 'incorrect_sku', 'name': 'Product 123 changed', 'description': 'Description 123 changed',
+        PRODUCTS,
+        data={'sku': 'incorrect_sku', 'name': PRODUCT_CHANGED, 'description': DESCRIPTION_CHANGED,
               'price': 321.0},
-        files={'image': ("product_image.png", product_image, "image/png")}
+        files={'image': (IMAGE_PNG, product_image, IMAGE_TYPE)}
     )
     assert response.status_code == 404
-    assert response.json().get('detail') == 'Product with sku incorrect_sku not found'
+    assert response.json().get('detail') == SKU_NOT_FOUND
     product_image.close()
     app.dependency_overrides = {}
 
@@ -146,9 +153,9 @@ def test_update_product_return_500_status_with_incorrect_image(product_image, pr
     # noinspection PyUnresolvedReferences
     app.dependency_overrides[ProductController] = ProductControllerMock
     response = client.put(
-        '/products',
-        data={'sku': '123', 'name': 'Product 123 changed', 'description': 'Description 123 changed', 'price': 321.0},
-        files={'image': ("bad_image.png", product_image, "image/png")}
+        PRODUCTS,
+        data={'sku': '123', 'name': PRODUCT_CHANGED, 'description': DESCRIPTION_CHANGED, 'price': 321.0},
+        files={'image': ("bad_image.png", product_image, IMAGE_TYPE)}
     )
     assert response.status_code == 500
     assert response.json().get('detail') == 'Could not upload file'
@@ -157,13 +164,13 @@ def test_update_product_return_500_status_with_incorrect_image(product_image, pr
 
 
 def test_delete_product_return_200_status(product_route_dependencies_mock):
-    response = client.delete('/products/123')
+    response = client.delete(f'{PRODUCTS}/123')
     assert_200_response(response)
     app.dependency_overrides = {}
 
 
 def test_delete_product_return_404_status_with_incorrect_sku(product_route_dependencies_mock):
-    response = client.delete('/products/incorrect_sku')
+    response = client.delete(f'{PRODUCTS}/incorrect_sku')
     assert response.status_code == 404
-    assert response.json().get('detail') == 'Product with sku incorrect_sku not found'
+    assert response.json().get('detail') == SKU_NOT_FOUND
     app.dependency_overrides = {}

@@ -5,6 +5,10 @@ from app.main import app
 from app.services.impl import UserService
 from tests.mocks.services_mocks import UserServiceMock
 
+AUTH_USERS_ME = '/auth/users/me'
+
+AUTH_TOKEN = '/auth/token'
+
 client = TestClient(app)
 
 
@@ -16,7 +20,7 @@ def user_service_mock():
 
 def test_login_for_access_token_return_access_token_with_200_status(user_service_mock):
     response = client.post(
-        '/auth/token',
+        AUTH_TOKEN,
         data={'username': 'admin', 'password': 'admin'}
     )
     assert response.status_code == 200
@@ -27,7 +31,7 @@ def test_login_for_access_token_return_access_token_with_200_status(user_service
 
 def test_login_for_access_token_return_401_status_with_incorrect_password(user_service_mock):
     response = client.post(
-        '/auth/token',
+        AUTH_TOKEN,
         data={'username': 'admin', 'password': 'wrong_password'}
     )
     assert response.status_code == 401
@@ -37,7 +41,7 @@ def test_login_for_access_token_return_401_status_with_incorrect_password(user_s
 
 def test_login_for_access_token_return_401_status_with_incorrect_username(user_service_mock):
     response = client.post(
-        '/auth/token',
+        AUTH_TOKEN,
         data={'username': 'wrong_username', 'password': 'admin'}
     )
     assert response.status_code == 401
@@ -47,12 +51,12 @@ def test_login_for_access_token_return_401_status_with_incorrect_username(user_s
 
 def test_read_users_me_return_user_with_200_status(user_service_mock):
     response = client.post(
-        '/auth/token',
+        AUTH_TOKEN,
         data={'username': 'admin', 'password': 'admin'}
     )
     access_token = response.json().get('access_token')
     response = client.get(
-        '/auth/users/me',
+        AUTH_USERS_ME,
         headers={'Authorization': f'Bearer {access_token}'}
     )
     assert response.status_code == 200
@@ -65,8 +69,8 @@ def test_read_users_me_return_user_with_200_status(user_service_mock):
 
 def test_read_users_me_return_401_status_with_incorrect_token(user_service_mock):
     response = client.get(
-        '/auth/users/me',
-        headers={'Authorization': f'Bearer incorrect_token'}
+        AUTH_USERS_ME,
+        headers={'Authorization': 'Bearer incorrect_token'}
     )
     assert response.status_code == 401
     assert response.json().get('detail') == 'Could not validate credentials'
@@ -75,12 +79,12 @@ def test_read_users_me_return_401_status_with_incorrect_token(user_service_mock)
 
 def test_read_users_me_return_401_status_with_incorrect_scopes(user_service_mock):
     response = client.post(
-        '/auth/token',
+        AUTH_TOKEN,
         data={'username': 'user', 'password': 'user'}
     )
     access_token = response.json().get('access_token')
     response = client.get(
-        '/auth/users/me',
+        AUTH_USERS_ME,
         headers={'Authorization': f'Bearer {access_token}'}
     )
     assert response.status_code == 401
