@@ -42,6 +42,7 @@ def order_123():
         ],
         "status": "pending",
         "total": 1035.0,
+        "user": "admin",
         "created_at": "2021-10-10T00:00:00Z"
     }
 

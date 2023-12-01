@@ -6,8 +6,8 @@ from app.services.impl import UserService
 from tests.mocks.services_mocks import UserServiceMock
 
 AUTH_USERS_ME = '/auth/users/me'
-
 AUTH_TOKEN = '/auth/token'
+AUTH_USERS = '/auth/users'
 
 client = TestClient(app)
 
@@ -89,4 +89,90 @@ def test_read_users_me_return_401_status_with_incorrect_scopes(user_service_mock
     )
     assert response.status_code == 401
     assert response.json().get('detail') == 'Not enough permissions'
+    app.dependency_overrides = {}
+
+
+def test_register_user_return_user_with_200_status(user_service_mock):
+    response = client.post(
+        AUTH_TOKEN,
+        data={'username': 'admin', 'password': 'admin'}
+    )
+    access_token = response.json().get('access_token')
+    response = client.post(
+        AUTH_USERS,
+        headers={'Authorization': f'Bearer {access_token}'},
+        json={
+            'username': 'client_1',
+            'password': 'client_1',
+            'email': 'client_1@gmail.com',
+            'full_name': 'Client 1',
+            'disabled': False,
+        }
+    )
+    assert response.status_code == 200
+    assert response.json().get('username') == "client_1"
+    assert response.json().get('email') == "client_1@gmail.com"
+    assert response.json().get('full_name') == "Client 1"
+    assert response.json().get('disabled') is False
+    app.dependency_overrides = {}
+
+
+def test_register_user_return_401_status_with_incorrect_token():
+    response = client.post(
+        AUTH_USERS,
+        headers={'Authorization': 'Bearer incorrect_token'},
+        json={
+            'username': 'client_1',
+            'password': 'client_1',
+            'email': 'client_1@gmail.com',
+            'full_name': 'Client 1',
+            'disabled': False,
+        }
+    )
+    assert response.status_code == 401
+    assert response.json().get('detail') == 'Could not validate credentials'
+    app.dependency_overrides = {}
+
+
+def test_register_user_return_401_status_with_incorrect_scopes(user_service_mock):
+    response = client.post(
+        AUTH_TOKEN,
+        data={'username': 'user', 'password': 'user'}
+    )
+    access_token = response.json().get('access_token')
+    response = client.post(
+        AUTH_USERS,
+        headers={'Authorization': f'Bearer {access_token}'},
+        json={
+            'username': 'client_1',
+            'password': 'client_1',
+            'email': 'client_1@gmail.com',
+            'full_name': 'Client 1',
+            'disabled': False,
+        }
+    )
+    assert response.status_code == 401
+    assert response.json().get('detail') == 'Not enough permissions'
+    app.dependency_overrides = {}
+
+
+def test_register_user_return_409_status_with_existing_username(user_service_mock):
+    response = client.post(
+        AUTH_TOKEN,
+        data={'username': 'admin', 'password': 'admin'}
+    )
+    access_token = response.json().get('access_token')
+    response = client.post(
+        AUTH_USERS,
+        headers={'Authorization': f'Bearer {access_token}'},
+        json={
+            'username': 'user',
+            'password': 'user',
+            'email': 'user@gmail.com',
+            'full_name': 'User',
+            'disabled': False,
+        }
+    )
+    assert response.status_code == 409
+    assert response.json().get('detail') == 'User already exists'
     app.dependency_overrides = {}

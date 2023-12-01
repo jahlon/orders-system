@@ -23,6 +23,7 @@ class OrderServiceMock(IOrderService):
                 ],
                 "status": "pending",
                 "total": 1035.0,
+                "user": "admin",
                 "created_at": "2021-10-10T00:00:00.000Z"
             },
             {
@@ -36,6 +37,7 @@ class OrderServiceMock(IOrderService):
                 ],
                 "status": "completed",
                 "total": 456.0,
+                "user": "client",
                 "created_at": "2021-10-11T00:00:00.000Z"
             },
         ]
@@ -116,7 +118,7 @@ class UserServiceMock(IUserService):
                 "full_name": "Administrator",
                 "disabled": False,
                 "hashed_password": '$2b$12$oJiP8xt.pXYyM4YSUI5b/.DivAFiVCXm7xkh15dckrkcRdlYE88J.',
-                "scopes": 'order_read order_write product_read product_write me'
+                "scopes": 'order_read order_write product_read product_write user_write me'
             },
             {
                 "username": 'user',
@@ -133,3 +135,7 @@ class UserServiceMock(IUserService):
         if not user:
             raise UserNotFoundError(f"User with username {username} not found")
         return UserInDB(**user)
+
+    def create(self, user: UserInDB) -> UserInDB:
+        self.users_collection.append(dict(user))
+        return user

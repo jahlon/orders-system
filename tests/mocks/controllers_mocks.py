@@ -3,9 +3,10 @@ from typing import Annotated
 from fastapi import Depends, UploadFile
 
 from app.data.errors import CouldNotUploadFileError
-from app.data.models import Product
-from app.services.impl import ProductService
-from app.services.interfaces import IProductService
+from app.data.models import Product, UserInDB
+from app.services.impl import ProductService, UserService
+from app.services.interfaces import IProductService, IUserService
+from app.services.security import get_password_hash
 
 
 class ProductControllerMock:
