@@ -7,7 +7,7 @@ from app.services.impl import UserService
 from app.services.interfaces import IUserService
 from app.services.security import get_password_hash
 
-USER_SCOPES = "product_read product_write order_read order_write me"
+USER_SCOPES = "product_read product_write user_order_read order_write me"
 
 
 class UserController:
