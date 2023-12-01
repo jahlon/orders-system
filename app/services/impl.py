@@ -62,6 +62,10 @@ class OrderService(IOrderService):
         orders = list(self.order_collection.find())
         return list(map(lambda order: OrderOut(**order), orders))
 
+    def get_all_by_user(self, username: str) -> list[OrderOut]:
+        orders = list(self.order_collection.find({'user': username}))
+        return list(map(lambda order: OrderOut(**order), orders))
+
     def get_by_id(self, order_id: str) -> OrderOut:
         order = self.order_collection.find_one({'id': order_id})
         if not order:

@@ -24,6 +24,9 @@ class IOrderService(Protocol):
     def get_all(self) -> list[OrderOut]:
         ...
 
+    def get_all_by_user(self, username: str) -> list[OrderOut]:
+        ...
+
     def get_by_id(self, order_id: str) -> OrderOut:
         ...
 
