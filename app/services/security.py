@@ -53,7 +53,8 @@ oauth2_scheme = OAuth2PasswordBearer(
         "product_read": "Read products",
         "product_write": "Create, update and delete products",
         "order_read": "Read orders",
-        "order_write": "Create orders"
+        "order_write": "Create orders",
+        "user_write": "Create users",
     }
 )
 
