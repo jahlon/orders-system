@@ -1,7 +1,58 @@
 from app.data.errors import UserNotFoundError, ProductNotFoundError, ProductAlreadyExistsError, \
-    CouldNotUpdateProductError
-from app.data.models import UserInDB, Product
-from app.services.interfaces import IUserService, IProductService
+    CouldNotUpdateProductError, OrderNotFoundError
+from app.data.models import UserInDB, Product, OrderOut
+from app.services.interfaces import IUserService, IProductService, IOrderService
+
+
+class OrderServiceMock(IOrderService):
+    def __init__(self):
+        self.orders_collection = [
+            {
+                "id": "123",
+                "products": [
+                    {
+                        "sku": "123",
+                        "price": 123.0,
+                        "quantity": 1
+                    },
+                    {
+                        "sku": "456",
+                        "price": 456.0,
+                        "quantity": 2
+                    },
+                ],
+                "status": "pending",
+                "total": 1035.0,
+                "created_at": "2021-10-10T00:00:00.000Z"
+            },
+            {
+                "id": "456",
+                "products": [
+                    {
+                        "sku": "456",
+                        "price": 456.0,
+                        "quantity": 1
+                    },
+                ],
+                "status": "completed",
+                "total": 456.0,
+                "created_at": "2021-10-11T00:00:00.000Z"
+            },
+        ]
+
+    def get_all(self) -> list[OrderOut]:
+        return list(map(lambda order: OrderOut(**order), self.orders_collection))
+
+    def get_by_id(self, order_id: str) -> OrderOut:
+        order = next((order for order in self.orders_collection if order['id'] == order_id), None)
+        if not order:
+            raise OrderNotFoundError(f"Order with id {order_id} not found")
+        return OrderOut(**order)
+
+    def create(self, order: OrderOut) -> OrderOut:
+        order_dict = dict(order)
+        self.orders_collection.append(order_dict)
+        return order
 
 
 class ProductServiceMock(IProductService):
