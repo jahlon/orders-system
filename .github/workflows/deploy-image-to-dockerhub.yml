@@ -29,8 +29,8 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/teaching-hub/orders-system-api:latest
-        labels: ${{ secrets.DOCKERHUB_USERNAME }}/teaching-hub/orders-system-api:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/orders-system-api:latest
+        labels: ${{ secrets.DOCKERHUB_USERNAME }}/orders-system-api:latest
         secrets: |
           AWS_KEY=${{ secrets.AWS_KEY }}
           AWS_SECRET=${{ secrets.AWS_SECRET }}
