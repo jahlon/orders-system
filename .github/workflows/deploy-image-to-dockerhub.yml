@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
     - name: Checkout code
@@ -30,6 +31,16 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/orders-system-api:latest
         labels: ${{ secrets.DOCKERHUB_USERNAME }}/orders-system-api:latest
+        secrets: |
+          AWS_KEY=${{ secrets.AWS_KEY }}
+          AWS_SECRET=${{ secrets.AWS_SECRET }}
+          AWS_REGION=${{ vars.AWS_REGION }}
+          AWS_BUCKET=${{ vars.AWS_BUCKET }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_HOST=${{ secrets.DB_HOST }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          JWT_ENCODING_KEY=${{ secrets.JWT_ENCODING_KEY }}
 
     env:
       DOCKER_CLI_EXPERIMENTAL: enabled
