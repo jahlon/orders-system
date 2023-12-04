@@ -13,15 +13,15 @@ RUN pip install --no-cache-dir --upgrade -r /orders-api/requirements.txt
 # Copy the app directory contents into the container at /orders-api
 COPY ./app /orders-api/app
 # Copy the .env file into the container at /orders-api
-RUN --mount=type=secret,id=AWS_KEY echo "AWS_KEY"$(cat /run/secrets/AWS_KEY) > /orders-api/.env
-RUN --mount=type=secret,id=AWS_SECRET echo "AWS_SECRET"$(cat /run/secrets/AWS_SECRET) >> /orders-api/.env
-RUN --mount=type=secret,id=AWS_REGION echo cat "AWS_REGION"$(cat /run/secrets/AWS_REGION) >> /orders-api/.env
-RUN --mount=type=secret,id=AWS_BUCKET echo cat "AWS_BUCKET"$(cat /run/secrets/AWS_BUCKET) >> /orders-api/.env
-RUN --mount=type=secret,id=DB_USER echo cat "DB_USER"$(cat /run/secrets/DB_USER) >> /orders-api/.env
-RUN --mount=type=secret,id=DB_PASSWORD echo cat "DB_PASSWORD"$(cat /run/secrets/DB_PASSWORD) >> /orders-api/.env
-RUN --mount=type=secret,id=DB_HOST echo cat "DB_HOST"$(cat /run/secrets/DB_HOST) >> /orders-api/.env
-RUN --mount=type=secret,id=DB_NAME echo cat "DB_NAME"$(cat /run/secrets/DB_NAME) >> /orders-api/.env
-RUN --mount=type=secret,id=JWT_ENCODING_KEY echo cat "JWT_ENCODING_KEY"$(cat /run/secrets/JWT_ENCODING_KEY) >> /orders-api/.env
+RUN --mount=type=secret,id=AWS_KEY echo "AWS_KEY="$(cat /run/secrets/AWS_KEY) > /orders-api/.env
+RUN --mount=type=secret,id=AWS_SECRET echo "AWS_SECRET="$(cat /run/secrets/AWS_SECRET) >> /orders-api/.env
+RUN --mount=type=secret,id=AWS_REGION echo "AWS_REGION="$(cat /run/secrets/AWS_REGION) >> /orders-api/.env
+RUN --mount=type=secret,id=AWS_BUCKET echo "AWS_BUCKET="$(cat /run/secrets/AWS_BUCKET) >> /orders-api/.env
+RUN --mount=type=secret,id=DB_USER echo "DB_USER="$(cat /run/secrets/DB_USER) >> /orders-api/.env
+RUN --mount=type=secret,id=DB_PASSWORD echo "DB_PASSWORD="$(cat /run/secrets/DB_PASSWORD) >> /orders-api/.env
+RUN --mount=type=secret,id=DB_HOST echo "DB_HOST="$(cat /run/secrets/DB_HOST) >> /orders-api/.env
+RUN --mount=type=secret,id=DB_NAME echo "DB_NAME="$(cat /run/secrets/DB_NAME) >> /orders-api/.env
+RUN --mount=type=secret,id=JWT_ENCODING_KEY echo "JWT_ENCODING_KEY="$(cat /run/secrets/JWT_ENCODING_KEY) >> /orders-api/.env
 
 
 # Make port 80 available to the world outside this container
