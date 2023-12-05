@@ -1,10 +1,9 @@
 name: Orders System API docker build and push
 
 on:
-  push:
   pull_request:
     branches:
-      - production
+      - master
 
 jobs:
   build:
