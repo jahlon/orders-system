@@ -3,7 +3,7 @@ from enum import Enum
 from typing import List
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class Product(BaseModel):
@@ -34,13 +34,12 @@ class OrderBase(BaseModel):
     products: List[Item]
     status: OrderStatus = OrderStatus.PENDING
 
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class OrderIn(OrderBase):
 
-    model_config = {
+    model_config = ConfigDict(**{
         'use_enum_values': True,
         'json_schema_extra': {
             'example': {
@@ -59,7 +58,7 @@ class OrderIn(OrderBase):
                 'status': 'pending'
             }
         }
-    }
+    })
 
 
 class OrderOut(OrderBase):

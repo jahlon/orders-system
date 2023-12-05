@@ -6,6 +6,10 @@ on:
       - master
 
 jobs:
+  test:
+    name: Test and lint
+    uses: ./.github/workflows/test-and-lint.yml
+
   build:
     runs-on: ubuntu-latest
     environment: production
@@ -32,7 +36,13 @@ jobs:
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/orders-system-api:latest
         labels: ${{ secrets.DOCKERHUB_USERNAME }}/orders-system-api:latest
 
+    env:
+      DOCKER_CLI_EXPERIMENTAL: enabled
+      DOCKER_BUILDKIT: 1
+
+  deploy:
     - name: Deploy docker image to Render
+      needs: build
       # Only run this step when the branch is master
       if: github.ref == 'refs/heads/master'
       env:
@@ -40,7 +50,5 @@ jobs:
       run: |
         curl "$DEPLOY_URL"
 
-    env:
-      DOCKER_CLI_EXPERIMENTAL: enabled
-      DOCKER_BUILDKIT: 1
+    
     
