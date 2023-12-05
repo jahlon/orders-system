@@ -2,8 +2,9 @@ name: Orders System API docker build and push
 
 on:
   push:
+  pull_request:
     branches:
-      - master
+      - production
 
 jobs:
   build:
@@ -31,16 +32,14 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/orders-system-api:latest
         labels: ${{ secrets.DOCKERHUB_USERNAME }}/orders-system-api:latest
-        secrets: |
-          AWS_KEY=${{ secrets.AWS_KEY }}
-          AWS_SECRET=${{ secrets.AWS_SECRET }}
-          AWS_REGION=${{ vars.AWS_REGION }}
-          AWS_BUCKET=${{ vars.AWS_BUCKET }}
-          DB_USER=${{ secrets.DB_USER }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_HOST=${{ secrets.DB_HOST }}
-          DB_NAME=${{ secrets.DB_NAME }}
-          JWT_ENCODING_KEY=${{ secrets.JWT_ENCODING_KEY }}
+
+    - name: Deploy docker image to Render
+      # Only run this step when the branch is production
+      if: github.ref == 'refs/heads/production'
+      env:
+        DEPLOY_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      run: |
+        curl "$DEPLOY_URL"
 
     env:
       DOCKER_CLI_EXPERIMENTAL: enabled
