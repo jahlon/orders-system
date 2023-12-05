@@ -26,9 +26,8 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
-        with:
-          env:
-            JWT_ENCODING_KEY: ${{ secrets.JWT_ENCODING_KEY }}
+    env:
+      JWT_ENCODING_KEY: ${{ secrets.JWT_ENCODING_KEY }}
 
   lint:
     name: Code standards
