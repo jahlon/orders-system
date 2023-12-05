@@ -41,6 +41,9 @@ jobs:
       DOCKER_BUILDKIT: 1
 
   deploy:
+    runs-on: ubuntu-latest
+
+    steps:
     - name: Deploy docker image to Render
       needs: build
       # Only run this step when the branch is master
