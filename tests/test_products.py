@@ -164,12 +164,16 @@ def test_update_product_return_500_status_with_incorrect_image(product_image, pr
 
 
 def test_delete_product_return_200_status(product_route_dependencies_mock):
+    # noinspection PyUnresolvedReferences
+    app.dependency_overrides[ProductController] = ProductControllerMock
     response = client.delete(f'{PRODUCTS}/123')
     assert_200_response(response)
     app.dependency_overrides = {}
 
 
 def test_delete_product_return_404_status_with_incorrect_sku(product_route_dependencies_mock):
+    # noinspection PyUnresolvedReferences
+    app.dependency_overrides[ProductController] = ProductControllerMock
     response = client.delete(f'{PRODUCTS}/incorrect_sku')
     assert response.status_code == 404
     assert response.json().get('detail') == SKU_NOT_FOUND

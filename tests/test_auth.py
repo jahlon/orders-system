@@ -117,7 +117,7 @@ def test_register_user_return_user_with_200_status(user_service_mock):
     app.dependency_overrides = {}
 
 
-def test_register_user_return_401_status_with_incorrect_token():
+def test_register_user_return_401_status_with_incorrect_token(user_service_mock):
     response = client.post(
         AUTH_USERS,
         headers={'Authorization': 'Bearer incorrect_token'},
