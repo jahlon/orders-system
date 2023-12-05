@@ -9,6 +9,7 @@ jobs:
   test:
     name: Test application
     runs-on: ubuntu-latest
+    environment: production
     timeout-minutes: 10
     steps:
       - name: Checkout code
@@ -25,6 +26,9 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
+        with:
+          env:
+            JWT_ENCODING_KEY: ${{ secrets.JWT_ENCODING_KEY }}
 
   lint:
     name: Code standards
