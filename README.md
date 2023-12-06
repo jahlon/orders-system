@@ -1,5 +1,8 @@
 # Orders System API
 
+![Tests](https://github.com/jahlon/orders-system/workflows/test-and-lint.yml/badge.svg)
+![CodeQL](https://github.com/jahlon/orders-system/workflows/codeql-analysis.yml/badge.svg)
+
 ## Description
 Orders System API simulates a simple order management system. 
 It allows you to create, update, delete and get orders and products.
