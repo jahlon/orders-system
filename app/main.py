@@ -6,7 +6,7 @@ from app.services.security import get_current_user
 
 description = """
 Orders System API simulates a simple order management system. 
-It allows you to create, update, delete and get orders and products.
+It allows you to create, update, delete and get orders and products. It also has an authentication system.
 It is intended to be used as a sample project for learning design patterns and principles to
 design and implement maintainable and reusable software.
 
