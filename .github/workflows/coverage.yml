@@ -65,6 +65,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage-report
+          path: coverage.xml
 
       - name: Coverage report
         run: |
