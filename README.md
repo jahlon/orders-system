@@ -2,6 +2,7 @@
 
 ![Tests](https://github.com/jahlon/orders-system/workflows/test-and-lint.yml/badge.svg)
 ![CodeQL](https://github.com/jahlon/orders-system/workflows/codeql-analysis.yml/badge.svg)
+![Coverage](https://jahlon.github.io/orders-system/coverage.svg)
 
 ## Description
 Orders System API simulates a simple order management system. 
