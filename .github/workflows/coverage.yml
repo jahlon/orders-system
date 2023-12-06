@@ -1,0 +1,78 @@
+name: Test Coverage
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'app/**'
+
+jobs:
+  test-report:
+    name: Test and report coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install pytest-cov
+          pip install -r requirements.txt
+
+      - name: Test with pytest
+        run: |
+          pytest --cov=app --cov-report=xml --cov-report=term
+
+      - name: Upload coverage data
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    needs: [test-report]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install coverage coverage-badge
+          pip install -r requirements.txt
+
+      - name: Download coverage data
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+      - name: Coverage report
+        run: |
+          coverage-badge -o coverage.svg
+
+      - name: Upload coverage badge
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: ./coverage.svg
+          target-folder: docs
+
+
+
