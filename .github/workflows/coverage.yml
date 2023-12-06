@@ -10,6 +10,7 @@ jobs:
   test-report:
     name: Test and report coverage
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout code
