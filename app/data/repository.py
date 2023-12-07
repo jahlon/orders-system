@@ -1,21 +1,16 @@
-import os
+from typing import Annotated
 
+from fastapi import Depends
 from pymongo import MongoClient
-from dotenv import load_dotenv
 
-load_dotenv()
-
-user = os.getenv('DB_USER')
-password = os.getenv('DB_PASSWORD')
-host = os.getenv('DB_HOST')
-db_name = os.getenv('DB_NAME')
+from app.config import Settings, get_settings
 
 
 class OrdersSystemRepository:
-    def __init__(self):
-        uri = f"mongodb+srv://{user}:{password}@{host}/?retryWrites=true&w=majority"
+    def __init__(self, settings: Annotated[Settings, Depends(get_settings)]):
+        uri = f"mongodb+srv://{settings.db_user}:{settings.db_password}@{settings.db_host}/?retryWrites=true&w=majority"
         self.__client = MongoClient(uri)
-        self.__db = self.client.get_database(db_name)
+        self.__db = self.client.get_database(settings.db_name)
 
     def get_collection(self, collection_name):
         return self.db[collection_name]
