@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from app.config import Settings, get_settings
 from app.main import app
 from app.services.impl import UserService
 from tests.mocks.services_mocks import UserServiceMock
@@ -16,6 +17,16 @@ client = TestClient(app)
 def user_service_mock():
     # noinspection PyUnresolvedReferences
     app.dependency_overrides[UserService] = UserServiceMock
+
+
+def get_testing_settings():
+    return Settings(_env_file='.env.test', _env_file_encoding='utf-8', _extra='allow')
+
+
+@pytest.fixture
+def testing_settings():
+    # noinspection PyUnresolvedReferences
+    app.dependency_overrides[get_settings] = get_testing_settings
 
 
 def test_login_for_access_token_return_access_token_with_200_status(user_service_mock):
