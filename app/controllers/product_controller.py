@@ -3,14 +3,16 @@ from typing import Annotated
 from fastapi import Depends, UploadFile
 
 from app.data.models import Product
-from app.services.aws_service import upload_file_to_s3, delete_file_from_s3
+from app.services.aws_service import AWSService, AWSServiceInterface
 from app.services.impl import ProductService
 from app.services.interfaces import IProductService
 
 
 class ProductController:
-    def __init__(self, product_service: Annotated[IProductService, Depends(ProductService)]):
+    def __init__(self, product_service: Annotated[IProductService, Depends(ProductService)],
+                 aws_service: Annotated[AWSServiceInterface, Depends(AWSService)]):
         self.product_service = product_service
+        self.aws_service = aws_service
 
     def get_all(self):
         return self.product_service.get_all()
@@ -21,7 +23,7 @@ class ProductController:
     async def create(self, sku: str, name: str, description: str, price: float, image: UploadFile):
         extension = image.filename.split('.')[-1]
         image_name = f"{sku}.{extension}"
-        image_url = await upload_file_to_s3(image_name, image.file)
+        image_url = await self.aws_service.upload_file_to_s3(image_name, image.file)
         product = Product(sku=sku, name=name, description=description, price=price, image_url=image_url)
         return self.product_service.create(product)
 
@@ -38,7 +40,7 @@ class ProductController:
         if image.file:
             extension = image.filename.split('.')[-1]
             image_name = f"{sku}.{extension}"
-            image_url = await upload_file_to_s3(image_name, image.file)
+            image_url = await self.aws_service.upload_file_to_s3(image_name, image.file)
             update_data['image_url'] = image_url
 
         updated_product = stored_product.model_copy(update=update_data)
@@ -47,5 +49,5 @@ class ProductController:
     async def delete(self, product_sku):
         product = self.product_service.delete(product_sku)
         extension = product.image_url.split('.')[-1]
-        await delete_file_from_s3(f"{product_sku}.{extension}")
+        await self.aws_service.delete_file_from_s3(f"{product_sku}.{extension}")
         return product
