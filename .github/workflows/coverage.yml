@@ -37,7 +37,7 @@ jobs:
 
       - name: Coverage report
         run: |
-          coverage-badge -o badges/coverage.svg
+          coverage-badge -o ./badges/coverage.svg
 
       - name: Upload coverage badge
         uses: JamesIves/github-pages-deploy-action@v4
