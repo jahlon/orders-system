@@ -6,6 +6,8 @@ on:
     paths:
       - 'app/**'
   workflow_dispatch:
+permissions:
+  contents: write
 
 jobs:
   test-report-with-coverage:
@@ -35,13 +37,13 @@ jobs:
 
       - name: Coverage report
         run: |
-          coverage-badge -o coverage.svg
+          coverage-badge -o badges/coverage.svg
 
       - name: Upload coverage badge
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: ./coverage.svg
+          folder: badges
           target-folder: docs
 
     env:
