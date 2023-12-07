@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
+from app.config import Settings, get_settings
 from app.controllers.user_controller import UserController
 from app.data.errors import UserNotFoundError, IncorrectPasswordError
 from app.data.models import User, UserIn
@@ -39,7 +40,8 @@ async def register_user(user: UserIn, controller: Annotated[UserController, Depe
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-                                 user_service: Annotated[IUserService, Depends(UserService)]):
+                                 user_service: Annotated[IUserService, Depends(UserService)],
+                                 settings: Annotated[Settings, Depends(get_settings)]):
     try:
         user = authenticate_user(form_data.username, form_data.password, user_service)
     except (UserNotFoundError, IncorrectPasswordError):
@@ -51,7 +53,9 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
     else:
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
-            data={'sub': user.username, "scopes": user.scopes.split()}, expires_delta=access_token_expires
+            data={'sub': user.username, "scopes": user.scopes.split()},
+            settings=settings,
+            expires_delta=access_token_expires
         )
         return {"access_token": access_token, "token_type": "bearer"}
 
