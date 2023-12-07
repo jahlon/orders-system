@@ -1,7 +1,7 @@
 # Orders System API
 
 ![Tests](https://github.com/jahlon/orders-system/actions/workflows/test-and-lint.yml/badge.svg)
-![CodeQL](https://github.com/jahlon/orders-system/action/workflows/codeql-analysis.yml/badge.svg)
+![CodeQL](https://github.com/jahlon/orders-system/actions/workflows/codeql-analysis.yml/badge.svg)
 ![Coverage](https://jahlon.github.io/orders-system/coverage.svg)
 
 ## Description
