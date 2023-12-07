@@ -1,8 +1,6 @@
-import os
 from datetime import timedelta, datetime
 from typing import Annotated
 
-from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 
@@ -13,15 +11,14 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 from starlette import status
 
+from app.config import Settings, get_settings
 from app.data.errors import UserNotFoundError, IncorrectPasswordError
 from app.data.models import User
 from app.services.impl import UserService
 from app.services.interfaces import IUserService
 
-load_dotenv()
 
 # Constant values for JWT
-SECRET_KEY = os.getenv("JWT_ENCODING_KEY")
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -100,10 +97,11 @@ def authenticate_user(username: str, password: str,
         return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+def create_access_token(data: dict, settings: Settings, expires_delta: timedelta | None = None) -> str:
     """
     Create a JWT token with given data
     :param data: Data to encode in the token
+    :param settings: Settings dependency
     :param expires_delta: Time delta for the token to expire
     :return: JWT token
     """
@@ -113,13 +111,14 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({'exp': expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.jwt_encoding_key, algorithm=ALGORITHM)
     return encoded_jwt
 
 
 async def get_current_user(security_scopes: SecurityScopes,
                            token: Annotated[str, Depends(oauth2_scheme)],
-                           user_service: Annotated[UserService, Depends(UserService)]) -> User:
+                           user_service: Annotated[UserService, Depends(UserService)],
+                           settings: Annotated[Settings, Depends(get_settings)]) -> User:
     """
     Get the current user from the JWT token.
 
@@ -129,6 +128,7 @@ async def get_current_user(security_scopes: SecurityScopes,
     :param security_scopes: Security scopes of the token
     :param token: JWT token
     :param user_service: User service dependency
+    :param settings: Settings dependency
     :return: User if authentication is successful
     :raises HTTPException: If authentication fails
     """
@@ -146,7 +146,7 @@ async def get_current_user(security_scopes: SecurityScopes,
 
     try:
         # Decode the token and get the username and scopes
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.jwt_encoding_key, algorithms=[ALGORITHM])
         username: str = payload.get('sub')  # sub is the username
         if username is None:
             raise credentials_exception
