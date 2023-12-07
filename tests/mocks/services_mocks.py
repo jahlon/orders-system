@@ -139,3 +139,11 @@ class UserServiceMock(IUserService):
     def create(self, user: UserInDB) -> UserInDB:
         self.users_collection.append(dict(user))
         return user
+
+
+class AWSServiceMock:
+    async def upload_file_to_s3(self, file_name: str, file) -> str:
+        return f"https://example.com/{file_name}"
+
+    async def delete_file_from_s3(self, file_name: str):
+        pass
