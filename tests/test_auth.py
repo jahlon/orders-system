@@ -1,9 +1,10 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.config import Settings, get_settings
+from app.config import get_settings
 from app.main import app
 from app.services.impl import UserService
+from tests.config import get_testing_settings
 from tests.mocks.services_mocks import UserServiceMock
 
 AUTH_USERS_ME = '/auth/users/me'
@@ -19,17 +20,13 @@ def user_service_mock():
     app.dependency_overrides[UserService] = UserServiceMock
 
 
-def get_testing_settings():
-    return Settings(_env_file='.env.test', _env_file_encoding='utf-8', _extra='allow')
-
-
 @pytest.fixture
 def testing_settings():
     # noinspection PyUnresolvedReferences
     app.dependency_overrides[get_settings] = get_testing_settings
 
 
-def test_login_for_access_token_return_access_token_with_200_status(user_service_mock):
+def test_login_for_access_token_return_access_token_with_200_status(user_service_mock, testing_settings):
     response = client.post(
         AUTH_TOKEN,
         data={'username': 'admin', 'password': 'admin'}
@@ -50,7 +47,7 @@ def test_login_for_access_token_return_401_status_with_incorrect_password(user_s
     app.dependency_overrides = {}
 
 
-def test_login_for_access_token_return_401_status_with_incorrect_username(user_service_mock):
+def test_login_for_access_token_return_401_status_with_incorrect_username(user_service_mock, testing_settings):
     response = client.post(
         AUTH_TOKEN,
         data={'username': 'wrong_username', 'password': 'admin'}
@@ -60,7 +57,7 @@ def test_login_for_access_token_return_401_status_with_incorrect_username(user_s
     app.dependency_overrides = {}
 
 
-def test_read_users_me_return_user_with_200_status(user_service_mock):
+def test_read_users_me_return_user_with_200_status(user_service_mock, testing_settings):
     response = client.post(
         AUTH_TOKEN,
         data={'username': 'admin', 'password': 'admin'}
@@ -78,7 +75,7 @@ def test_read_users_me_return_user_with_200_status(user_service_mock):
     app.dependency_overrides = {}
 
 
-def test_read_users_me_return_401_status_with_incorrect_token(user_service_mock):
+def test_read_users_me_return_401_status_with_incorrect_token(user_service_mock, testing_settings):
     response = client.get(
         AUTH_USERS_ME,
         headers={'Authorization': 'Bearer incorrect_token'}
@@ -88,7 +85,7 @@ def test_read_users_me_return_401_status_with_incorrect_token(user_service_mock)
     app.dependency_overrides = {}
 
 
-def test_read_users_me_return_401_status_with_incorrect_scopes(user_service_mock):
+def test_read_users_me_return_401_status_with_incorrect_scopes(user_service_mock, testing_settings):
     response = client.post(
         AUTH_TOKEN,
         data={'username': 'user', 'password': 'user'}
@@ -103,7 +100,7 @@ def test_read_users_me_return_401_status_with_incorrect_scopes(user_service_mock
     app.dependency_overrides = {}
 
 
-def test_register_user_return_user_with_200_status(user_service_mock):
+def test_register_user_return_user_with_200_status(user_service_mock, testing_settings):
     response = client.post(
         AUTH_TOKEN,
         data={'username': 'admin', 'password': 'admin'}
@@ -128,7 +125,7 @@ def test_register_user_return_user_with_200_status(user_service_mock):
     app.dependency_overrides = {}
 
 
-def test_register_user_return_401_status_with_incorrect_token(user_service_mock):
+def test_register_user_return_401_status_with_incorrect_token(user_service_mock, testing_settings):
     response = client.post(
         AUTH_USERS,
         headers={'Authorization': 'Bearer incorrect_token'},
@@ -145,7 +142,7 @@ def test_register_user_return_401_status_with_incorrect_token(user_service_mock)
     app.dependency_overrides = {}
 
 
-def test_register_user_return_401_status_with_incorrect_scopes(user_service_mock):
+def test_register_user_return_401_status_with_incorrect_scopes(user_service_mock, testing_settings):
     response = client.post(
         AUTH_TOKEN,
         data={'username': 'user', 'password': 'user'}
@@ -167,7 +164,7 @@ def test_register_user_return_401_status_with_incorrect_scopes(user_service_mock
     app.dependency_overrides = {}
 
 
-def test_register_user_return_409_status_with_existing_username(user_service_mock):
+def test_register_user_return_409_status_with_existing_username(user_service_mock, testing_settings):
     response = client.post(
         AUTH_TOKEN,
         data={'username': 'admin', 'password': 'admin'}
